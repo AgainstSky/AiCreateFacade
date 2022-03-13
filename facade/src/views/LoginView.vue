@@ -35,7 +35,7 @@
                 </el-input>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary">Login</el-button>
+                <el-button type="primary" @click="onPasswordLoginClick">Login</el-button>
               </el-form-item>
             </el-form>
 
@@ -73,7 +73,10 @@
 
 <script>
 import {User, MagicStick} from '@element-plus/icons-vue'
-import axios from "axios";
+// import axios from "axios";
+import {instance} from "@/api/api";
+import {Network} from "@/api/Network";
+import {ElMessage} from "element-plus";
 
 export default {
   name: "LoginView",
@@ -86,15 +89,33 @@ export default {
       wechatQrDialogVis: false,
       pwdLoginParam: {
         phone: '',
-        password: ''
+        password: '',
+        type: 1
       },
       loginImgUrl: 'https://aicreate-1253626419.cos.ap-shanghai.myqcloud.com/54DD723F-2EF2-452B-AA54-6B0D6A63D378.jpeg'
     }
   },
   methods: {
+    onPasswordLoginClick() {
+      let that = this;
+      Network.login(this.pwdLoginParam).then(resp => {
+        if (resp.data.success){
+          //缓存token信息
+          let data = resp.data.data;
+          localStorage.setItem('token',data.token)
+          localStorage.setItem('tokenHead',data.head)
+          //跳转
+          that.$router.push('index')
+        }else {
+          ElMessage.error(resp.data.msg)
+        }
+      }).catch()
+    },
     onWechatLoginClick() {
-
-      window.location.href = 'https://open.weixin.qq.com/connect/qrconnect?appid=wx7a04e843a99eb4c1&redirect_uri=https://api.wx.yungouos.com/callback/wxmp/oauth&response_type=code&scope=snsapi_login&state=A2957C0259C74D0180D106642A5DAED0#wechat_redirect'
+      instance.get("/test").then(resp => {
+        console.log(resp)
+      })
+      // window.location.href = 'https://open.weixin.qq.com/connect/qrconnect?appid=wx7a04e843a99eb4c1&redirect_uri=https://api.wx.yungouos.com/callback/wxmp/oauth&response_type=code&scope=snsapi_login&state=A2957C0259C74D0180D106642A5DAED0#wechat_redirect'
 
       // let obj = new WxLogin({
       //   self_redirect:true,
